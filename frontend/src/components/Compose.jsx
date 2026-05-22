@@ -24,7 +24,7 @@ export default function Compose({ userId, onComposeDone }) {
     setError(null);
     
     try {
-      await axios.post(`${API_URL}/api/send`, {
+      await api.post(`${API_URL}/api/send`, {
         userId,
         to: to.trim(),
         subject: subject.trim(),

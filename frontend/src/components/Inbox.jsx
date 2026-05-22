@@ -24,7 +24,7 @@ export default function Inbox({ userId }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${API_URL}/api/inbox?userId=${userId}`
       );
       setEmails(response.data.emails);

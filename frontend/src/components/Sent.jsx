@@ -24,7 +24,7 @@ export default function Sent({ userId }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
+      const response = await api.get(
         `${API_URL}/api/sent?userId=${userId}`
       );
       setEmails(response.data.emails);

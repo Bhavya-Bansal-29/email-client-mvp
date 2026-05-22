@@ -9,7 +9,7 @@ export default function Login() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_URL}/auth/login`);
+      const response = await api.get(`${API_URL}/auth/login`);
       window.location.href = response.data.authUrl;
     } catch (error) {
       showToast.error('Failed to initiate login. Please try again.');
