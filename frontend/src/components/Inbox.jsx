@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../api';
+import { showToast } from '../toast';
 import { Loader2, AlertTriangle, RefreshCw, MailOpen, Inbox as InboxIcon } from 'lucide-react';
 
 const getAvatarStyle = (name) => {
@@ -27,8 +28,11 @@ export default function Inbox({ userId }) {
         `${API_URL}/api/inbox?userId=${userId}`
       );
       setEmails(response.data.emails);
+      showToast.success('Inbox loaded');
     } catch (err) {
-      setError('Failed to load inbox. Please try again.');
+      const errorMsg = 'Failed to load inbox. Please try again.';
+      setError(errorMsg);
+      showToast.error(errorMsg);
       console.error(err);
     } finally {
       setLoading(false);

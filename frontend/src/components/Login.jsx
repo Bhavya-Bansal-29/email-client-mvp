@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../api';
+import { showToast } from '../toast';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -11,7 +12,7 @@ export default function Login() {
       const response = await axios.get(`${API_URL}/auth/login`);
       window.location.href = response.data.authUrl;
     } catch (error) {
-      alert('Failed to initiate login');
+      showToast.error('Failed to initiate login. Please try again.');
       setLoading(false);
     }
   };

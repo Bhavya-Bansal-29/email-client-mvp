@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_URL } from '../api';
+import { showToast } from '../toast';
 import { Loader2, AlertTriangle, RefreshCw, MailOpen, Send } from 'lucide-react';
 
 const getAvatarStyle = (name) => {
@@ -27,8 +28,11 @@ export default function Sent({ userId }) {
         `${API_URL}/api/sent?userId=${userId}`
       );
       setEmails(response.data.emails);
+      showToast.success('Sent emails loaded');
     } catch (err) {
-      setError('Failed to load sent emails. Please try again.');
+      const errorMsg = 'Failed to load sent emails. Please try again.';
+      setError(errorMsg);
+      showToast.error(errorMsg);
       console.error(err);
     } finally {
       setLoading(false);

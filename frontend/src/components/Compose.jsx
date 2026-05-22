@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { API_URL } from '../api';
+import { showToast } from '../toast';
 import { Send, Loader2, CheckCircle2, AlertCircle, PenLine } from 'lucide-react';
 
 export default function Compose({ userId, onComposeDone }) {
@@ -15,7 +16,7 @@ export default function Compose({ userId, onComposeDone }) {
     e.preventDefault();
     
     if (!to.trim() || !subject.trim() || !body.trim()) {
-      setError('Please fill in all fields');
+      showToast.warning('Please fill in all fields');
       return;
     }
 
@@ -30,6 +31,7 @@ export default function Compose({ userId, onComposeDone }) {
         body: body.trim(),
       });
 
+      showToast.success('Email sent successfully!');
       setSuccess(true);
       setTo('');
       setSubject('');
@@ -40,9 +42,9 @@ export default function Compose({ userId, onComposeDone }) {
         onComposeDone();
       }, 2000);
     } catch (err) {
-      setError(
-        err.response?.data?.error || 'Failed to send email. Please try again.'
-      );
+      const errorMsg = err.response?.data?.error || 'Failed to send email. Please try again.';
+      setError(errorMsg);
+      showToast.error(errorMsg);
       console.error(err);
     } finally {
       setLoading(false);
