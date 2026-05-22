@@ -2,80 +2,129 @@ import { useState } from 'react';
 import Inbox from './Inbox';
 import Sent from './Sent';
 import Compose from './Compose';
-import { Mail, Inbox as InboxIcon, Send, PenLine, LogOut } from 'lucide-react';
+import { Mail, Inbox as InboxIcon, Send, PenLine, LogOut, Menu, X } from 'lucide-react';
 
 export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState('inbox');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const tabs = [
-    { id: 'inbox', label: 'Inbox', icon: <InboxIcon size={18} /> },
-    { id: 'sent', label: 'Sent', icon: <Send size={18} /> },
-    { id: 'compose', label: 'Compose', icon: <PenLine size={18} /> },
+  const navItems = [
+    { id: 'inbox', label: 'Inbox', icon: InboxIcon },
+    { id: 'sent', label: 'Sent', icon: Send },
   ];
 
+  const handleNavClick = (id) => {
+    setActiveTab(id);
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-snow dark:bg-onyx transition-colors duration-200 flex flex-col">
-      {/* Header */}
-      <header className="bg-white dark:bg-graphite border-b border-graphite/10 dark:border-snow/10 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-verdigris/10 text-verdigris flex items-center justify-center">
-                <Mail size={24} />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-onyx dark:text-snow tracking-tight">
-                  Iris
-                </h1>
-                <p className="text-xs font-medium text-graphite/70 dark:text-snow/70 truncate max-w-[200px] sm:max-w-xs">
-                  {user.email}
-                </p>
-              </div>
-            </div>
-            {/* Mobile Logout */}
-            <button
-              onClick={onLogout}
-              className="md:hidden p-2 rounded-lg text-graphite dark:text-snow/70 hover:bg-graphite/5 dark:hover:bg-snow/5 hover:text-onyx dark:hover:text-snow transition-colors"
-            >
-              <LogOut size={20} />
-            </button>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-            <nav className="flex w-full sm:w-auto bg-graphite/5 dark:bg-snow/5 p-1 rounded-lg overflow-x-auto hide-scrollbar">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 sm:flex-none flex justify-center items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-colors duration-200 ${
-                    activeTab === tab.id
-                      ? 'bg-white dark:bg-graphite text-verdigris shadow-sm'
-                      : 'text-graphite dark:text-snow/70 hover:text-onyx dark:hover:text-snow hover:bg-graphite/10 dark:hover:bg-snow/10'
-                  }`}
-                >
-                  {tab.icon}
-                  <span className="hidden sm:inline">{tab.label}</span>
-                </button>
-              ))}
-            </nav>
+    <div className="h-screen bg-snow dark:bg-onyx transition-colors duration-200 flex overflow-hidden">
 
-            <button
-              onClick={onLogout}
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition-colors duration-200 text-graphite dark:text-snow/70 hover:bg-graphite/5 dark:hover:bg-snow/5 hover:text-onyx dark:hover:text-snow border border-transparent hover:border-graphite/20 dark:hover:border-snow/20"
-            >
-              <LogOut size={18} />
-              <span>Logout</span>
-            </button>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-onyx/40 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-white dark:bg-graphite border-r border-graphite/10 dark:border-snow/10
+        flex flex-col transition-transform duration-200 ease-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        {/* Logo */}
+        <div className="p-5 pb-4 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-verdigris/10 text-verdigris flex items-center justify-center flex-shrink-0">
+            <Mail size={20} />
           </div>
+          <h1 className="text-lg font-bold text-onyx dark:text-snow tracking-tight">Iris</h1>
         </div>
-      </header>
 
-      {/* Content Area */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 animate-fade-in" style={{ animationDelay: '0.1s', opacity: 0 }}>
-        {activeTab === 'inbox' && <Inbox userId={user.userId} />}
-        {activeTab === 'sent' && <Sent userId={user.userId} />}
-        {activeTab === 'compose' && <Compose userId={user.userId} onComposeDone={() => setActiveTab('sent')} />}
-      </main>
+        {/* Compose button */}
+        <div className="px-3 mb-2">
+          <button
+            onClick={() => handleNavClick('compose')}
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 ${
+              activeTab === 'compose'
+                ? 'bg-verdigris text-snow shadow-md shadow-verdigris/20'
+                : 'bg-verdigris/10 text-verdigris hover:bg-verdigris/20'
+            }`}
+          >
+            <PenLine size={18} />
+            <span>Compose</span>
+          </button>
+        </div>
+
+        {/* Nav items */}
+        <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
+          {navItems.map(({ id, label, icon: Icon }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => handleNavClick(id)}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  isActive
+                    ? 'bg-verdigris/8 dark:bg-verdigris/12 text-verdigris font-semibold'
+                    : 'text-graphite dark:text-snow/70 hover:bg-graphite/5 dark:hover:bg-snow/5 hover:text-onyx dark:hover:text-snow'
+                }`}
+              >
+                <Icon size={18} className={isActive ? 'text-verdigris' : ''} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* User + Logout */}
+        <div className="p-3 border-t border-graphite/10 dark:border-snow/10">
+          <div className="flex items-center gap-3 px-3 py-2 mb-1">
+            <div className="w-8 h-8 rounded-full bg-verdigris/10 text-verdigris flex items-center justify-center text-xs font-bold flex-shrink-0">
+              {user.email.charAt(0).toUpperCase()}
+            </div>
+            <p className="text-xs font-medium text-graphite/70 dark:text-snow/70 truncate flex-1">
+              {user.email}
+            </p>
+          </div>
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-xl font-medium text-sm text-graphite dark:text-snow/70 hover:bg-graphite/5 dark:hover:bg-snow/5 hover:text-onyx dark:hover:text-snow transition-colors"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Mobile top bar */}
+        <header className="lg:hidden bg-white dark:bg-graphite border-b border-graphite/10 dark:border-snow/10 px-4 py-3 flex items-center gap-3 sticky top-0 z-30">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-1.5 rounded-lg text-graphite dark:text-snow/70 hover:bg-graphite/5 dark:hover:bg-snow/5 transition-colors"
+          >
+            <Menu size={22} />
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md bg-verdigris/10 text-verdigris flex items-center justify-center">
+              <Mail size={16} />
+            </div>
+            <h1 className="text-base font-bold text-onyx dark:text-snow tracking-tight">Iris</h1>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto animate-fade-in" style={{ animationDelay: '0.05s', opacity: 0 }}>
+          {activeTab === 'inbox' && <Inbox userId={user.userId} />}
+          {activeTab === 'sent' && <Sent userId={user.userId} />}
+          {activeTab === 'compose' && <Compose userId={user.userId} onComposeDone={() => setActiveTab('sent')} />}
+        </main>
+      </div>
     </div>
   );
 }

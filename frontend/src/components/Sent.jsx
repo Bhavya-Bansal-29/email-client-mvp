@@ -130,7 +130,7 @@ export default function Sent({ userId }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)] min-h-[600px]">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-80px)] lg:h-[calc(100vh-48px)] min-h-[500px]">
       {/* Email List Sidebar */}
       <div className="lg:col-span-4 flex flex-col bg-white dark:bg-graphite rounded-xl overflow-hidden shadow-sm border border-graphite/10 dark:border-snow/10">
         <div className="p-4 border-b border-graphite/10 dark:border-snow/10 flex justify-between items-center bg-snow/50 dark:bg-onyx/50">
