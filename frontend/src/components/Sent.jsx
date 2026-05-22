@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { API_URL } from '../api';
+import { api, API_URL } from '../api';
 import { showToast } from '../toast';
 import { Loader2, AlertTriangle, RefreshCw, MailOpen, Send } from 'lucide-react';
 

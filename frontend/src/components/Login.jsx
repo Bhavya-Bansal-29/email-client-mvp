@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { API_URL } from '../api';
+import { api, API_URL } from '../api';
 import { showToast } from '../toast';
 
 export default function Login() {
