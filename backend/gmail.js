@@ -1,5 +1,4 @@
 const { google } = require('googleapis');
-const cache = require('./cache');
 const db = require('./db');
 const { refreshAccessToken } = require('./auth');
 
@@ -10,8 +9,8 @@ async function getUserAccessToken(userId) {
       'SELECT access_token, refresh_token, token_expiry FROM users WHERE id = ?',
       [userId],
       async (err, row) => {
-        if (err) reject(err);
-        if (!row) reject(new Error('User not found'));
+        if (err) return reject(err);
+        if (!row) return reject(new Error('User not found'));
 
         // Check if token is expired and refresh if needed
         if (row.token_expiry && row.token_expiry < Date.now()) {
@@ -34,11 +33,7 @@ async function getUserAccessToken(userId) {
 }
 
 // Fetch inbox emails
-async function getInboxEmails(userId, maxResults = 10) {
-  const cacheKey = `inbox_${userId}`;
-  const cached = cache.get(cacheKey);
-  if (cached) return cached;
-
+async function getInboxEmails(userId, maxResults = 20) {
   try {
     const accessToken = await getUserAccessToken(userId);
     const authClient = new google.auth.OAuth2();
@@ -53,7 +48,6 @@ async function getInboxEmails(userId, maxResults = 10) {
 
     const messages = response.data.messages || [];
 
-    // Get full message details
     const emailsPromises = messages.map((msg) =>
       gmail.users.messages.get({ userId: 'me', id: msg.id, format: 'full' })
     );
@@ -72,7 +66,6 @@ async function getInboxEmails(userId, maxResults = 10) {
       };
     });
 
-    cache.set(cacheKey, emails);
     return emails;
   } catch (error) {
     console.error('Error fetching inbox:', error);
@@ -81,11 +74,7 @@ async function getInboxEmails(userId, maxResults = 10) {
 }
 
 // Fetch sent emails
-async function getSentEmails(userId, maxResults = 10) {
-  const cacheKey = `sent_${userId}`;
-  const cached = cache.get(cacheKey);
-  if (cached) return cached;
-
+async function getSentEmails(userId, maxResults = 20) {
   try {
     const accessToken = await getUserAccessToken(userId);
     const authClient = new google.auth.OAuth2();
@@ -118,7 +107,6 @@ async function getSentEmails(userId, maxResults = 10) {
       };
     });
 
-    cache.set(cacheKey, emails);
     return emails;
   } catch (error) {
     console.error('Error fetching sent emails:', error);
@@ -156,9 +144,6 @@ async function sendEmail(userId, to, subject, body) {
         raw: encodedMessage,
       },
     });
-
-    // Invalidate sent emails cache
-    cache.del(`sent_${userId}`);
 
     return response.data;
   } catch (error) {

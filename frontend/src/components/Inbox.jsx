@@ -75,7 +75,7 @@ export default function Inbox({ userId }) {
   }, [fetchInbox]);
 
   const handleManualRefresh = () => {
-    fetchInbox({ silent: false });
+    fetchInbox();
   };
 
   if (loading) {
