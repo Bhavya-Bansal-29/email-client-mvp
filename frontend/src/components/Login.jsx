@@ -42,7 +42,6 @@ export default function Login() {
             </>
           ) : (
             <>
-              <span>🔐</span>
               <span>Sign in with Gmail</span>
             </>
           )}
