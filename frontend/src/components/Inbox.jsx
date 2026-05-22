@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { api, API_URL } from '../api';
 import { showToast } from '../toast';
 import { Loader2, AlertTriangle, RefreshCw, MailOpen, Inbox as InboxIcon } from 'lucide-react';
+
+const POLL_INTERVAL = 30000; // 30 seconds
 
 const getAvatarStyle = (name) => {
   const cleanName = name ? name.split('<')[0].replace(/"/g, '').trim() : 'Unknown';
@@ -13,30 +15,67 @@ const getAvatarStyle = (name) => {
 export default function Inbox({ userId }) {
   const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [selectedEmail, setSelectedEmail] = useState(null);
+  const pollTimerRef = useRef(null);
 
-  useEffect(() => {
-    fetchInbox();
-  }, [userId]);
-
-  const fetchInbox = async () => {
-    setLoading(true);
+  const fetchInbox = useCallback(async ({ silent = false } = {}) => {
+    if (!silent) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
     setError(null);
     try {
       const response = await api.get(
         `${API_URL}/api/inbox?userId=${userId}`
       );
-      setEmails(response.data.emails);
-      showToast.success('Inbox loaded');
+      const newEmails = response.data.emails;
+      
+      // If silent refresh and we got new emails, show a notification
+      if (silent && newEmails.length > emails.length) {
+        const diff = newEmails.length - emails.length;
+        showToast.info(`${diff} new email${diff > 1 ? 's' : ''} received`);
+      }
+      
+      setEmails(newEmails);
+      if (!silent) {
+        showToast.success('Inbox loaded');
+      }
     } catch (err) {
-      const errorMsg = 'Failed to load inbox. Please try again.';
-      setError(errorMsg);
-      showToast.error(errorMsg);
+      if (!silent) {
+        const errorMsg = 'Failed to load inbox. Please try again.';
+        setError(errorMsg);
+        showToast.error(errorMsg);
+      }
       console.error(err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  }, [userId, emails.length]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchInbox();
+  }, [userId]);
+
+  // Auto-poll for new emails
+  useEffect(() => {
+    pollTimerRef.current = setInterval(() => {
+      fetchInbox({ silent: true });
+    }, POLL_INTERVAL);
+
+    return () => {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+      }
+    };
+  }, [fetchInbox]);
+
+  const handleManualRefresh = () => {
+    fetchInbox({ silent: false });
   };
 
   if (loading) {
@@ -56,7 +95,7 @@ export default function Inbox({ userId }) {
         <AlertTriangle className="mx-auto mb-4 text-verdigris" size={32} />
         <p className="text-onyx dark:text-snow font-medium text-lg mb-6">{error}</p>
         <button
-          onClick={fetchInbox}
+          onClick={handleManualRefresh}
           className="bg-verdigris hover:bg-pearl text-snow dark:text-onyx font-semibold py-2 px-6 rounded-md transition-colors"
         >
           Try Again
@@ -74,11 +113,12 @@ export default function Inbox({ userId }) {
             Inbox <span className="px-2 py-0.5 rounded-md bg-graphite/5 dark:bg-snow/10 text-graphite dark:text-snow text-xs">{emails.length}</span>
           </h2>
           <button
-            onClick={fetchInbox}
-            className="p-1.5 rounded-md text-graphite/70 hover:text-verdigris hover:bg-graphite/5 dark:hover:bg-snow/5 transition-colors"
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+            className="p-1.5 rounded-md text-graphite/70 hover:text-verdigris hover:bg-graphite/5 dark:hover:bg-snow/5 transition-colors disabled:opacity-50"
             title="Refresh Inbox"
           >
-            <RefreshCw size={16} />
+            <RefreshCw size={16} className={refreshing ? 'animate-spin' : ''} />
           </button>
         </div>
         
