@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../api';
 import { Send, Loader2, CheckCircle2, AlertCircle, PenLine } from 'lucide-react';
 
 export default function Compose({ userId, onComposeDone }) {
@@ -22,7 +23,7 @@ export default function Compose({ userId, onComposeDone }) {
     setError(null);
     
     try {
-      await axios.post('http://localhost:5000/api/send', {
+      await axios.post(`${API_URL}/api/send`, {
         userId,
         to: to.trim(),
         subject: subject.trim(),

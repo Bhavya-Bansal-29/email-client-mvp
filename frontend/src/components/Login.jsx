@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Mail, Loader2, LogIn } from 'lucide-react';
+import { API_URL } from '../api';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -8,7 +8,7 @@ export default function Login() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:5000/auth/login');
+      const response = await axios.get(`${API_URL}/auth/login`);
       window.location.href = response.data.authUrl;
     } catch (error) {
       alert('Failed to initiate login');
@@ -22,7 +22,7 @@ export default function Login() {
         
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-verdigris/10 text-verdigris mb-6">
-            <Mail size={32} />
+            <span>📧</span>
           </div>
           <h1 className="text-3xl font-bold text-onyx dark:text-snow mb-2 tracking-tight">
             Email Client
@@ -36,12 +36,12 @@ export default function Login() {
         >
           {loading ? (
             <>
-              <Loader2 className="animate-spin" size={20} />
+              <span className="animate-spin">⚙️</span>
               <span>Connecting...</span>
             </>
           ) : (
             <>
-              <LogIn size={20} />
+              <span>🔐</span>
               <span>Sign in with Gmail</span>
             </>
           )}

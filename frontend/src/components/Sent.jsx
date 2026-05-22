@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../api';
 import { Loader2, AlertTriangle, RefreshCw, MailOpen, Send } from 'lucide-react';
 
 const getAvatarStyle = (name) => {
@@ -23,7 +24,7 @@ export default function Sent({ userId }) {
     setError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/api/sent?userId=${userId}`
+        `${API_URL}/api/sent?userId=${userId}`
       );
       setEmails(response.data.emails);
     } catch (err) {
