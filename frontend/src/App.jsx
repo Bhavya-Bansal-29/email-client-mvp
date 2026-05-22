@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
+import { Toaster } from 'sonner';
 import { api, API_URL } from './api';
 import { showToast } from './toast';
 import Login from './components/Login';
@@ -71,22 +69,31 @@ function App() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen bg-snow dark:bg-onyx">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-snow dark:bg-onyx">
+        <div className="w-8 h-8 border-2 border-verdigris/30 border-t-verdigris rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-snow dark:bg-onyx font-sans text-onyx dark:text-snow transition-colors duration-200">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: '#2b2c28',
+            color: '#fffafb',
+            border: '1px solid rgba(255,250,251,0.08)',
+            borderRadius: '10px',
+            fontSize: '13px',
+            fontFamily: "'Raleway', system-ui, sans-serif",
+            padding: '10px 16px',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
+          },
+        }}
+        gap={8}
+        visibleToasts={3}
       />
       {!user ? <Login /> : <Dashboard user={user} onLogout={handleLogout} />}
     </div>

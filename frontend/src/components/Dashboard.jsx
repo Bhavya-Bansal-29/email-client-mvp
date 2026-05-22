@@ -25,7 +25,7 @@ export default function Dashboard({ user, onLogout }) {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-onyx dark:text-snow tracking-tight">
-                  Email Client
+                  Iris
                 </h1>
                 <p className="text-xs font-medium text-graphite/70 dark:text-snow/70 truncate max-w-[200px] sm:max-w-xs">
                   {user.email}

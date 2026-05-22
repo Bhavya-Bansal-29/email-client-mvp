@@ -1,16 +1,58 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import axios from 'axios';
 import { api, API_URL } from '../api';
 import { showToast } from '../toast';
-import { Loader2, AlertTriangle, RefreshCw, MailOpen, Send } from 'lucide-react';
+import { AlertTriangle, RefreshCw, MailOpen, Send } from 'lucide-react';
 
-const POLL_INTERVAL = 30000; // 30 seconds
+const POLL_INTERVAL = 30000;
 
 const getAvatarStyle = (name) => {
   const cleanName = name ? name.split('<')[0].replace(/"/g, '').trim() : 'Unknown';
   const initials = cleanName.substring(0, 2).toUpperCase() || '??';
   return { initials, colorClass: 'bg-pearl/20 text-verdigris' };
 };
+
+function EmailSkeleton() {
+  return (
+    <div className="p-3 rounded-lg animate-pulse">
+      <div className="flex gap-3">
+        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-graphite/10 dark:bg-snow/10" />
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="h-3.5 bg-graphite/10 dark:bg-snow/10 rounded w-28" />
+            <div className="h-3 bg-graphite/10 dark:bg-snow/10 rounded w-14" />
+          </div>
+          <div className="h-3 bg-graphite/10 dark:bg-snow/10 rounded w-44" />
+          <div className="h-2.5 bg-graphite/8 dark:bg-snow/8 rounded w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailSkeleton() {
+  return (
+    <div className="flex flex-col h-full animate-pulse">
+      <div className="p-6 border-b border-graphite/10 dark:border-snow/10 bg-snow/30 dark:bg-onyx/30 space-y-4">
+        <div className="h-6 bg-graphite/10 dark:bg-snow/10 rounded w-3/4" />
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-graphite/10 dark:bg-snow/10" />
+          <div className="flex-1 space-y-2">
+            <div className="h-3.5 bg-graphite/10 dark:bg-snow/10 rounded w-40" />
+            <div className="h-2.5 bg-graphite/8 dark:bg-snow/8 rounded w-56" />
+            <div className="h-2.5 bg-graphite/8 dark:bg-snow/8 rounded w-48" />
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 p-6 space-y-3">
+        <div className="h-3 bg-graphite/8 dark:bg-snow/8 rounded w-full" />
+        <div className="h-3 bg-graphite/8 dark:bg-snow/8 rounded w-5/6" />
+        <div className="h-3 bg-graphite/8 dark:bg-snow/8 rounded w-4/6" />
+        <div className="h-3 bg-graphite/8 dark:bg-snow/8 rounded w-full" />
+        <div className="h-3 bg-graphite/8 dark:bg-snow/8 rounded w-3/4" />
+      </div>
+    </div>
+  );
+}
 
 export default function Sent({ userId }) {
   const [emails, setEmails] = useState([]);
@@ -39,9 +81,6 @@ export default function Sent({ userId }) {
       }
 
       setEmails(newEmails);
-      if (!silent) {
-        showToast.success('Sent emails loaded');
-      }
     } catch (err) {
       if (!silent) {
         const errorMsg = 'Failed to load sent emails. Please try again.';
@@ -55,12 +94,10 @@ export default function Sent({ userId }) {
     }
   }, [userId, emails.length]);
 
-  // Initial fetch
   useEffect(() => {
     fetchSent();
   }, [userId]);
 
-  // Auto-poll for new sent emails
   useEffect(() => {
     pollTimerRef.current = setInterval(() => {
       fetchSent({ silent: true });
@@ -74,19 +111,8 @@ export default function Sent({ userId }) {
   }, [fetchSent]);
 
   const handleManualRefresh = () => {
-    fetchSent({ silent: false });
+    fetchSent();
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[500px]">
-        <div className="text-center animate-fade-in text-graphite/70 dark:text-snow/70">
-          <Loader2 className="animate-spin mx-auto mb-4" size={32} />
-          <p className="font-medium">Fetching sent emails...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -109,11 +135,11 @@ export default function Sent({ userId }) {
       <div className="lg:col-span-4 flex flex-col bg-white dark:bg-graphite rounded-xl overflow-hidden shadow-sm border border-graphite/10 dark:border-snow/10">
         <div className="p-4 border-b border-graphite/10 dark:border-snow/10 flex justify-between items-center bg-snow/50 dark:bg-onyx/50">
           <h2 className="font-semibold text-lg text-onyx dark:text-snow flex items-center gap-2">
-            Sent <span className="px-2 py-0.5 rounded-md bg-graphite/5 dark:bg-snow/10 text-graphite dark:text-snow text-xs">{emails.length}</span>
+            Sent {!loading && <span className="px-2 py-0.5 rounded-md bg-graphite/5 dark:bg-snow/10 text-graphite dark:text-snow text-xs">{emails.length}</span>}
           </h2>
           <button
             onClick={handleManualRefresh}
-            disabled={refreshing}
+            disabled={refreshing || loading}
             className="p-1.5 rounded-md text-graphite/70 hover:text-verdigris hover:bg-graphite/5 dark:hover:bg-snow/5 transition-colors disabled:opacity-50"
             title="Refresh Sent"
           >
@@ -122,7 +148,16 @@ export default function Sent({ userId }) {
         </div>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-          {emails.length === 0 ? (
+          {loading ? (
+            <>
+              <EmailSkeleton />
+              <EmailSkeleton />
+              <EmailSkeleton />
+              <EmailSkeleton />
+              <EmailSkeleton />
+              <EmailSkeleton />
+            </>
+          ) : emails.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-graphite/60 dark:text-snow/60 p-8 text-center">
               <Send size={48} className="mb-4 opacity-50" strokeWidth={1.5} />
               <p className="font-medium text-lg text-onyx dark:text-snow">No Sent Emails</p>
@@ -174,7 +209,9 @@ export default function Sent({ userId }) {
 
       {/* Email Detail Pane */}
       <div className="lg:col-span-8 flex flex-col bg-white dark:bg-graphite rounded-xl overflow-hidden shadow-sm border border-graphite/10 dark:border-snow/10">
-        {selectedEmail ? (
+        {loading ? (
+          <DetailSkeleton />
+        ) : selectedEmail ? (
           <div className="flex flex-col h-full animate-fade-in">
             <div className="p-6 border-b border-graphite/10 dark:border-snow/10 bg-snow/30 dark:bg-onyx/30">
               <h3 className="text-xl font-bold text-onyx dark:text-snow mb-4 leading-tight">

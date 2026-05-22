@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { api, API_URL } from '../api';
 import { showToast } from '../toast';
+import { Mail, Loader2 } from 'lucide-react';
 
 export default function Login() {
   const [loading, setLoading] = useState(false);
@@ -23,10 +23,10 @@ export default function Login() {
         
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-verdigris/10 text-verdigris mb-6">
-            <span>📧</span>
+            <Mail size={28} />
           </div>
           <h1 className="text-3xl font-bold text-onyx dark:text-snow mb-2 tracking-tight">
-            Email Client
+            Iris
           </h1>
         </div>
 
@@ -37,13 +37,11 @@ export default function Login() {
         >
           {loading ? (
             <>
-              <span className="animate-spin">⚙️</span>
+              <Loader2 size={18} className="animate-spin" />
               <span>Connecting...</span>
             </>
           ) : (
-            <>
-              <span>Sign in with Gmail</span>
-            </>
+            <span>Sign in with Gmail</span>
           )}
         </button>
 
